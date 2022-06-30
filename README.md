@@ -1,0 +1,2 @@
+# IOT-based-Smart-Irrigation-Solution
+This solution focuses on easing the process of irrigation. This would consist of a ‘SOIL MOISTURE SENSOR” which monitors the water level in soil. The sensor would detect the presence of water, if the moisture level is low, it would convey to pump the water and if moisture level is good then it would continue to monitor the moisture level in different areas of the field.
