@@ -1,30 +1,33 @@
-#include <Servo.h>          //Servo motor library. This is standard library
-#include <NewPing.h>        //Ultrasonic sensor function library. You must install this library
+#include <Servo.h>             //Import all the functions related to servo motors
+#include <NewPing.h>        //Import all the functions related to UV Distace sensor
 
-//our L298N control pins
+//Declaring arduino pins for motors 
+
 const int LeftMotorForward = 5;
 const int LeftMotorBackward = 4;
 const int RightMotorForward = 3;
 const int RightMotorBackward = 2;
+const int sensormotorIN1 = 6;
+const int sensormotorIN2 = 7;
 
 //sensor pins
-#define trig_pin A3 //analog input 1
-#define echo_pin A2 //analog input 2
+int trig_pin = A3; //Declaring analog pin 3 for trig of UV sensor
+int echo_pin = A2 ;//Declaring analog pin 2 for echo of UV sensor
+int sensorPin = A0; //Declaring analog pin 0 for Soil Moisture Sensor
 
 #define maximum_distance 200
 boolean goesForward = false;
 int distance = 100;
 
-
-int sensorPin = A0; 
+//for soil moisture sensor
 int sensorValue;  
 int limit = 300; 
-NewPing sonar(trig_pin, echo_pin, maximum_distance); //sensor function
-Servo servo_motor; //our servo name
 
+NewPing sonar(trig_pin, echo_pin, maximum_distance); // Calling sensor function
+Servo servo_motor;                                  //Naming Servo motor
 
 void setup(){
-
+  Serial.begin(9600);
   pinMode(RightMotorForward, OUTPUT);
   pinMode(LeftMotorForward, OUTPUT);
   pinMode(LeftMotorBackward, OUTPUT);
@@ -42,13 +45,17 @@ void setup(){
   delay(100);
   distance = readPing();
   delay(100);
-  Serial.begin(9600);
-   pinMode(13, OUTPUT);
+  pinMode(13, OUTPUT);
 }
 
-
 void loop(){
-
+  int input=0;
+if(Serial.available()>0)
+{
+  input=Serial.read();
+  Serial.write(input);
+}
+if(input==1){
   int distanceRight = 0;
   int distanceLeft = 0;
   delay(50);
@@ -76,22 +83,35 @@ void loop(){
   }
   else{
     moveForward(); 
+    delay(15000);
+    moveStop();
+    digitalWrite(sensormotorIN1,HIGH);
+    delay(4000);
+    digitalWrite(sensormotorIN1,LOW);
+    sensorValue = analogRead(sensorPin); 
+    Serial.println("Analog Value : ");
+    Serial.println(sensorValue);
+ 
+    if (sensorValue<limit) {
+    digitalWrite(13, HIGH); 
+    Serial.print('1');
+    }
+    else {
+    digitalWrite(13, LOW); 
+    Serial.print('0');
+    digitalWrite(sensormotorIN2,HIGH);
+    delay(4000);
+    digitalWrite(sensormotorIN2,LOW);
+ }
+ delay(1000);
   }
     distance = readPing();
-
-    sensorValue = analogRead(sensorPin); 
- Serial.println("Analog Value : ");
- Serial.println(sensorValue);
- 
- if (sensorValue<limit) {
- digitalWrite(13, HIGH); 
-  Serial.print('1');
- }
- else {
- digitalWrite(13, LOW); 
- Serial.print('0');
- }
-  delay(1000); 
+}
+else
+{
+  moveStop();
+}
+  
 }
 
 int lookRight(){  
